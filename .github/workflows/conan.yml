@@ -24,12 +24,13 @@ jobs:
           pip install git+https://github.com/jcfr/wheeltools.git@wheeltools-2018-10-28-a2f174d0e
           pip install -r requirements-dev.txt
       - name: Build CMake
+        #  $<SETUP_BDIST_WHEEL_ARGS> -- $<SETUP_CMAKE_ARGS> -- $<SETUP_MAKE_ARGS>
         run: |
           flake8
           # Source distribution
           python setup.py --hide-listing sdist
           # Built distribution (wheel)
-          python setup.py --hide-listing bdist_wheel $<SETUP_BDIST_WHEEL_ARGS> -- $<SETUP_CMAKE_ARGS> -- $<SETUP_MAKE_ARGS>
+          python setup.py --hide-listing bdist_wheel
           # Cleanup
           echo "import glob, os
           if os.environ.get('UPLOAD_SDIST', '') == '':
