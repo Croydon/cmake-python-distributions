@@ -7,31 +7,12 @@ language: python
 
 matrix:
   include:
-
-    - os: osx
-      language: generic
-      env:
-        - PYTHON_VERSION=3.7.8
-
-    - os: osx
-      language: generic
-      env:
-        - PYTHON_VERSION=2.7.15
-
     - os: linux
       arch: arm64-graviton2
       virt: vm
       group: edge
       dist: focal
       language: generic
-
-before_cache:
-  # Cleanup to avoid the cache to grow indefinitely as new package versions are released
-  # see https://stackoverflow.com/questions/39930171/cache-brew-builds-with-travis-ci
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew cleanup
-    fi
 
 cache:
   directories:
