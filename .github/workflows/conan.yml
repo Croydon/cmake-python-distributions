@@ -4,35 +4,43 @@ name: cmake-python
 
 jobs:
   test:
-    name: Test ${{ matrix.os }}
+    name: Test ${{ matrix.os }} Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["windows-2019"]
+        os: ["windows-2016"]
         python: ["2.7", "3.7"]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
-      - name: Install Dependencies
-        run: |
-          python -m pip install scikit-ci scikit-ci-addons
-          python -m ci_addons --install ../addons
-      - name: Execute rolling-build
-        if: matrix.os == 'windows-2019'
-        run: ../addons/appveyor/rolling-build.ps1
-        shell: powershell
       - name: Build CMake
         run: |
-          python -m ci install
-          python -m ci build
-          python -m ci test
-          python -m ci after_test
-      - name: Execute enable-worker-remote-accesss
-        if: matrix.os == 'windows-2019'
-        run: ../addons/appveyor/enable-worker-remote-access.ps1 -check_for_block
-        shell: powershell
+          python -c "import sys; print(sys.version)"
+          python -m pip install --disable-pip-version-check --upgrade pip
+          pip install pytest-virtualenv -f https://github.com/jcfr/pytest-plugins/releases/tag/v1.7.0.dev15 --pre
+          pip install git+https://github.com/jcfr/wheeltools.git@wheeltools-2018-10-28-a2f174d0e
+          pip install -r requirements-dev.txt
+          flake8
+          # Source distribution
+          python setup.py --hide-listing sdist
+          # Built distribution (wheel)
+          python setup.py --hide-listing bdist_wheel $<SETUP_BDIST_WHEEL_ARGS> -- $<SETUP_CMAKE_ARGS> -- $<SETUP_MAKE_ARGS>
+          # Cleanup
+          echo "import glob, os\n
+          if os.environ.get('UPLOAD_SDIST', '') == '':
+              sdist=(glob.glob('dist/*.tar.gz') + glob.glob('dist/*.zip'))[0]
+              print('Deleting [%s]' % sdist)
+              os.remove(sdist)" | python
+          # Convert to generic platform wheel
+          echo "import glob, sys
+          sys.path.insert(0, './scripts')
+          from convert_to_generic_platform_wheel import convert_to_generic_platform_wheel
+          wheels = glob.glob('dist/*.whl')
+          for wheel in wheels:
+              convert_to_generic_platform_wheel(wheel, remove_original=True)" | python
+          python setup.py test
   
 ## TODO: Deploy
