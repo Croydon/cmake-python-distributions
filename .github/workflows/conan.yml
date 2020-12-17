@@ -50,6 +50,9 @@ jobs:
       - name: Output CMake Version And Path
         run: |
           which cmake
-          cmake --version     
+          cmake --version
+          cd dist 
+          ls -l     
   
 ## TODO: Deploy
+## secret PYPI_TOKEN
