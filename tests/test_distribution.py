@@ -21,8 +21,14 @@ def _check_cmake_install(virtualenv, tmpdir):
         message("${CMAKE_COMMAND}")
         """))
 
-    output = virtualenv.run("cmake -P %s" % str(test_script), capture=True)
-    expected = os.path.realpath(virtualenv.virtualenv).replace(os.sep, "/")
+    user_home_dir = os.getenv("HOME", os.getenv("userprofile", "")).replace(os.sep, "/")
+    user_home_dir_len = len(user_home_dir.split("/"))
+
+    output_full = virtualenv.run("cmake -P %s" % str(test_script), capture=True)
+    expected_full = os.path.realpath(virtualenv.virtualenv).replace(os.sep, "/")
+
+    output = join(output_full.split("/")[user_home_dir_len:])
+    expected = join(expected_full.split("/")[user_home_dir_len:])
     assert output[:len(expected)].lower() == expected.lower()
 
 
