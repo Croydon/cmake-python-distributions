@@ -16,13 +16,15 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
-      - name: Build CMake
+      - name: Install Dependencies 
         run: |
           python -c "import sys; print(sys.version)"
           python -m pip install --disable-pip-version-check --upgrade pip
           pip install pytest-virtualenv -f https://github.com/jcfr/pytest-plugins/releases/tag/v1.7.0.dev15 --pre
           pip install git+https://github.com/jcfr/wheeltools.git@wheeltools-2018-10-28-a2f174d0e
           pip install -r requirements-dev.txt
+      - name: Build CMake
+        run: |
           flake8
           # Source distribution
           python setup.py --hide-listing sdist
@@ -41,6 +43,8 @@ jobs:
           wheels = glob.glob('dist/*.whl')
           for wheel in wheels:
               convert_to_generic_platform_wheel(wheel, remove_original=True)" | python
+      - name: Execute tests
+        run: | 
           python setup.py test
   
 ## TODO: Deploy
