@@ -44,8 +44,12 @@ jobs:
           wheels = glob.glob('dist/*.whl')
           for wheel in wheels:
               convert_to_generic_platform_wheel(wheel, remove_original=True)" | python
-      - name: Execute tests
+      - name: Execute Tests
         run: | 
           python setup.py test
+      - name: Output CMake Version And Path
+        run: |
+          which cmake
+          cmake --version     
   
 ## TODO: Deploy
